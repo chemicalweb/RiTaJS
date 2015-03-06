@@ -3058,8 +3058,7 @@
 			if (is(grammar, S)) {
 
 				try {
-					grammar = JSON.parse(grammar);
-
+					grammar = (typeof YAML != 'undefined' ? YAML : JSON).parse(grammar);
 				}
 				catch (e) {
 					
@@ -6153,7 +6152,7 @@
 	
 	var W_QUESTION_STARTS = ["Was", "What", "When", "Where", "How", "Which", "Why", "Who", "Will"];
 	
-	var PUNCTUATION_CLASS = /[`~\"\/'_\-[\]{}()*+!?%&.,\\^$|#@<>|+=;:]/g; // TODO: missing smart-quotes
+	var PUNCTUATION_CLASS = /[`~\"\/'_\-[\]{}()*+!?%&.,\\^$|#@<>|+=;:]/g; // TODO: add smart-quotes
 	
 	var ONLY_PUNCT = /^[^0-9A-Za-z\s]*$/, RiTextCallbacksDisabled = false,
 	    DEFAULT_PLURAL_RULE = RE("^((\\w+)(-\\w+)*)(\\s((\\w+)(-\\w+)*))*$", 0, "s"),
