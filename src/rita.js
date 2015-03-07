@@ -546,7 +546,7 @@
 		},
 		
 		// hack to load a text file from the DOM via an invisible iframe
-		_loadStringDOM : function(url, callback, linebreakChars) {
+	   _loadStringDOM : function(url, callback, linebreakChars) {
 			
 			var lb = linebreakChars || SP, cwin, iframe, me = this;
 			
@@ -594,17 +594,18 @@
 				me.fireDataLoaded(url, callback, data);
 			};
 		},	
-		
 		loadStrings : function(url, callback) {
 			
 			if (is(url, A)) 
 				throw Error("RiTa.loadStrings() does not accept multiple urls");
 				
 			var fireDataLoaded = this.fireDataLoaded;
-			this.loadString(url, function(d) {
-				 var lines = d.split('\n');
-				 fireDataLoaded(url, callback, lines); 
-			}, '\n');
+
+            this.loadString(url, function(d) {
+                var lines = d.split('\n');
+                fireDataLoaded(url, callback, lines);
+            }, '\n'); 
+
 		},
 						
 		// TODO: add NodeJS tests for all loadXX methods
@@ -3042,34 +3043,45 @@
 		loadFrom : function(url, callback) {
 
 			RiTa.loadString(url, function(data) {
-	
+	      
 				this.load(data);
 				is(callback, F) && (callback(data));
 				
-			}.bind(this));
+			}.bind(this), '\n');
 		},
 
 		load : function(grammar) {
-
-			var ex; 
 			
 			this.reset();
 			
 			if (is(grammar, S)) {
-
-				try {
-					grammar = (typeof YAML != 'undefined' ? YAML : JSON).parse(grammar);
-				}
-				catch (e) {
-					
-					ex = e;
-				}
+			    
+			    if (typeof YAML != 'undefined') {
+    				try {   
+    				    
+				        //console.log('trying YAML');
+                        grammar = YAML.parse(grammar);
+    				}
+    				catch (e) {
+                        warn('YAML parsing failed, trying JSON');
+    				}
+                }
+				
+				if (!is(grammar, O)) {
+                    try {
+                        
+                        //console.log('trying JSON');
+                        grammar = JSON.parse(grammar);
+                    }
+                    catch (e) { var ex = e}
+                }
 			}
 			
 			if (ex || !is(grammar, O)) {  
 				
+				typeof YAML == 'undefined' && warn("No YAML parser found!");
 				err('Grammar appears to be invalid JSON/YAML, please check' +
-					' it! (http://jsonlint.com/)\n' + grammar);
+					' it! (http://jsonlint.com/ or http://yamllint.com/)', grammar);
 					
 				return;
 			}
@@ -6951,8 +6963,11 @@
 	function err(msg) {
 		
 		//(!RiTa.SILENT) && console && console.trace(this);
-		
-		throw Error("[RiTa] " + msg);
+     
+        var msg = "[RiTa] " + arguments[0];
+        for (var i = 1; i < arguments.length; i++)
+            msg += '\n' + arguments[i];
+        throw Error(msg); 
 	}
 	
 	function warn() {
@@ -6962,16 +6977,15 @@
 		if (arguments && arguments.length) {
 			console.warn("[WARN] "+arguments[0]);
 			for (var i = 1; i < arguments.length; i++) 
-				console.warn('  '+arguments[i]);
+				console.warn(arguments[i]);
 		}
 	}
  
 	function log() {
 	
-		if (RiTa.SILENT || !console) return;        
-		
-		for ( var i = 0; i < arguments.length; i++) 
-			console.log(arguments[i]);
+        if (RiTa.SILENT || !console) return;
+        for (var i = 0; i < arguments.length; i++)
+            console.log(arguments[i]);
 	}
 
 	function strOk(str) {
