@@ -3197,7 +3197,7 @@
 		print : function() {  
 			
 			if (console) {
-				var ln = "------------------------------";
+				var ln = "\n------------------------------";
 				console.log(ln+"\n"+this.getGrammar()+ln);
 			}
 			return this;
